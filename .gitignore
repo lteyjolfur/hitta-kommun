@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+db.sqlite3
+staticfiles/
+# Downloaded source files: convert them with manage.py, commit only data/
+raw/

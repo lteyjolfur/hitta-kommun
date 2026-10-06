@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: kommun-finder
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application
+    healthCheckPath: /
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true

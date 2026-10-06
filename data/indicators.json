@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "violent-crime",
+    "name": "Anmälda våldsbrott",
+    "unit": "per 1 000 invånare och år, snitt 2020–2022",
+    "year": 2022,
+    "lower_is_better": true,
+    "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
+    "source_url": "",
+    "file": "values/violent-crime.csv"
+  },
+  {
+    "slug": "theft",
+    "name": "Anmälda stöld- och tillgreppsbrott",
+    "unit": "per 1 000 invånare och år, snitt 2020–2022",
+    "year": 2022,
+    "lower_is_better": true,
+    "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
+    "source_url": "",
+    "file": "values/theft.csv"
+  },
+  {
+    "slug": "vandalism",
+    "name": "Anmälda brott om skadegörelse",
+    "unit": "per 1 000 invånare och år, snitt 2020–2022",
+    "year": 2022,
+    "lower_is_better": true,
+    "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
+    "source_url": "",
+    "file": "values/vandalism.csv"
+  },
+  {
+    "slug": "house-price",
+    "name": "Medelpris småhus",
+    "unit": "tkr",
+    "year": 2023,
+    "lower_is_better": true,
+    "source": "SCB, Fastighetspriser och lagfarter",
+    "source_url": "https://www.statistikdatabasen.scb.se/",
+    "file": "values/house-price.csv"
+  }
+]

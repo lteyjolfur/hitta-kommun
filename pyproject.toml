@@ -1,0 +1,7 @@
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = ["finder/migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ"]

@@ -1,0 +1,76 @@
+{% load static %}<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hitta din kommun</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23256abf'/%3E%3Cpath d='M8 3a3 3 0 0 0-3 3c0 2.2 3 6 3 6s3-3.8 3-6a3 3 0 0 0-3-3z' fill='white'/%3E%3C/svg%3E">
+  <meta name="description" content="Rangordna Sveriges kommuner efter det som är viktigt för dig.">
+  <link rel="stylesheet" href="{% static 'finder/vendor/leaflet/leaflet.css' %}">
+  <link rel="stylesheet" href="{% static 'finder/app.css' %}">
+</head>
+<body>
+  <main class="layout">
+    <aside class="panel">
+      <header>
+        <h1>Hitta din kommun</h1>
+        <p class="lede">Välj vad som är viktigt för dig. Kartan och listan visar vilka kommuner som passar bäst.</p>
+      </header>
+
+      <form id="weights" class="weights" aria-label="Viktning">
+        {% for ind in indicators %}
+        <div class="weight{% if not ind.has_data %} weight--empty{% endif %}">
+          <label for="w_{{ ind.slug }}">
+            <span class="weight__name">{{ ind.name }}</span>
+            <output for="w_{{ ind.slug }}" id="o_{{ ind.slug }}"></output>
+          </label>
+          <input type="range" id="w_{{ ind.slug }}" name="w_{{ ind.slug }}"
+                 min="0" max="{{ max_weight }}" step="1"
+                 value="{% if ind.has_data %}5{% else %}0{% endif %}"
+                 {% if not ind.has_data %}disabled{% endif %}>
+          <p class="weight__meta">
+            {% if ind.has_data %}
+              {% if ind.lower_is_better %}Lägre är bättre{% else %}Högre är bättre{% endif %} · {{ ind.unit }}
+            {% else %}
+              Ingen data inlagd ännu
+            {% endif %}
+          </p>
+        </div>
+        {% empty %}
+        <p>Ingen data inlagd. Kör <code>python manage.py load_data</code>.</p>
+        {% endfor %}
+      </form>
+
+      <section aria-labelledby="ranking-title">
+        <h2 id="ranking-title">Bäst matchning</h2>
+        <ol id="ranking" class="ranking"></ol>
+        <p id="status" class="status" role="status"></p>
+      </section>
+
+      <footer class="sources">
+        <h2>Källor</h2>
+        <ul>
+          {% for ind in indicators %}{% if ind.has_data %}
+          <li>{{ ind.name }}: {% if ind.source_url %}<a href="{{ ind.source_url }}">{{ ind.source }}</a>{% else %}{{ ind.source }}{% endif %}</li>
+          {% endif %}{% endfor %}
+          <li>Kommungränser: &lt;KÄLLA SAKNAS – fyll i före publicering&gt;</li>
+        </ul>
+        <p>Anmälda brott visar inte all brottslighet och påverkas av t.ex. turism och pendling.</p>
+      </footer>
+    </aside>
+
+    <section class="map-wrap" aria-label="Karta">
+      <div id="map"></div>
+      <div id="legend" class="legend" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  {{ indicators|json_script:"indicators-data" }}
+  <script src="{% static 'finder/vendor/leaflet/leaflet.js' %}"></script>
+  <script>
+    window.KOMMUN_GEOJSON_URL = "{% static 'finder/kommuner.geojson' %}";
+    window.RANK_URL = "{% url 'api-rank' %}";
+  </script>
+  <script src="{% static 'finder/app.js' %}"></script>
+</body>
+</html>
