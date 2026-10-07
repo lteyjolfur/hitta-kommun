@@ -53,7 +53,7 @@
           {% for dim in dimensions %}{% for ind in dim.indicators %}{% if ind.has_data %}
           <li>{{ ind.name }}{% if ind.year %} ({{ ind.year }}){% endif %}: {% if ind.source_url %}<a href="{{ ind.source_url }}">{{ ind.source }}</a>{% else %}{{ ind.source }}{% endif %}</li>
           {% endif %}{% endfor %}{% endfor %}
-          <li>Kommungränser: &lt;KÄLLA SAKNAS – fyll i före publicering&gt;</li>
+          <li>Kommungränser: <a href="https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/digitala-granser/">SCB, Digitala gränser</a></li>
         </ul>
         <p>Anmälda brott visar inte all brottslighet och påverkas av t.ex. turism och pendling.</p>
         <p>Medelpriset bygger på få försäljningar i små kommuner (färre än 20 köp i några av dem) och kan svänga mycket mellan åren.</p>

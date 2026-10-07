@@ -20,6 +20,7 @@ Dimensions live in `data/dimensions.json`, indicators in `data/indicators.json`.
 |---|---|---|---|
 | Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | MSB, *Öppna jämförelser: trygghet och säkerhet 2023* (Brå) | loaded |
 | Boendekostnad | Average small-house price 2025 | SCB, *Fastighetspriser och lagfarter* | loaded |
+| Boendekostnad | Small-house price per m² (N07909) | Kolada (data from SCB) | after the first Kolada import |
 | Boendekostnad | House price / median income | computed when loading | after the first Kolada import |
 | Ekonomi och jobb | Median income, unemployment, tax rate | Kolada | after the first Kolada import |
 | Skola | Average merit value and gymnasium eligibility, year 9 | Kolada | after the first Kolada import |
@@ -136,7 +137,8 @@ kommun.
 ### Map boundaries
 
 `finder/static/finder/kommuner.geojson`, `lan.geojson` and `data/kommuner.csv`
-were built from a SWEREF 99 TM kommun shapefile. Shared borders are simplified
+were built from SCB's kommun boundaries
+([Digitala gränser](https://www.scb.se/hitta-statistik/regional-statistik-och-kartor/regionala-indelningar/digitala-granser/), SWEREF 99 TM shapefile). Shared borders are simplified
 once (a coverage simplification), so neighbouring kommuner still meet exactly.
 Small overlaps in the source are assigned to one kommun and reported:
 
