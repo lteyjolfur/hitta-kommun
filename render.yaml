@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kommun-finder
+    name: hitta-kommun
     runtime: python
     plan: free
     region: frankfurt

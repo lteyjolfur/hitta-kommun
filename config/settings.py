@@ -1,4 +1,4 @@
-"""Django settings for kommun-finder.
+"""Django settings for hitta-kommun.
 
 Configuration comes from environment variables so the same file works locally
 and on Render. Defaults are for local development.
