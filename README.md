@@ -16,7 +16,7 @@ score.
 | Reported violent crime | per 1,000 inhabitants per year, average 2020–2022 | MSB, *Öppna jämförelser: trygghet och säkerhet 2023* (Brå crime statistics) | loaded |
 | Reported theft | same | same | loaded |
 | Reported vandalism | same | same | loaded |
-| Average house price (småhus) | tkr | SCB, *Fastighetspriser och lagfarter* | **not loaded yet**, see below |
+| Average house price (småhus) | tkr, average purchase price 2025 | SCB, *Fastighetspriser och lagfarter 2025* | loaded |
 
 Reported crime is not the same as all crime. It is also skewed by tourism,
 commuting and shopping centres in small municipalities. The app says this on

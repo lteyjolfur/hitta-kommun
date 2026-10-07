@@ -32,10 +32,10 @@
   {
     "slug": "house-price",
     "name": "Medelpris småhus",
-    "unit": "tkr",
-    "year": 2023,
+    "unit": "tkr, medelpris vid köp 2025",
+    "year": 2025,
     "lower_is_better": true,
-    "source": "SCB, Fastighetspriser och lagfarter",
+    "source": "SCB, Fastighetspriser och lagfarter 2025 (småhus för permanent boende)",
     "source_url": "https://www.statistikdatabasen.scb.se/",
     "file": "values/house-price.csv"
   }
