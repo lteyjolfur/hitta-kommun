@@ -40,7 +40,8 @@ class FakeKolada:
         if path.startswith("kpi/"):
             kpi = self.kpis.get(path[4:])
             return {"values": [kpi] if kpi else []}
-        if path == "data":
+        if path == "data/":
+            assert params["region_type"] == "municipality"
             return {"values": self.data.get((params["kpi_id"], params["year"]), [])}
         raise AssertionError(path)
 
@@ -92,10 +93,11 @@ class AdapterTests(SimpleTestCase):
             data_row("0114", 33.1),
             data_row("0114", 99.0, gender="K"),
             data_row("0000", 32.0),  # Riket
+            data_row("1440", 31.5, gender=None),  # KPI not divided by gender
             {"kpi": "N00900", "municipality": "0115", "period": 2024, "values": [{"gender": "T", "value": None}]},
         ]
         fake = FakeKolada(data={("N00900", 2024): rows})
-        self.assertEqual(kolada.fetch_year(fake, "N00900", 2024, KOMMUNER), {"0114": 33.1})
+        self.assertEqual(kolada.fetch_year(fake, "N00900", 2024, KOMMUNER), {"0114": 33.1, "1440": 31.5})
 
     def test_follows_next_url(self):
         fake = FakeKolada()
@@ -104,7 +106,7 @@ class AdapterTests(SimpleTestCase):
 
         def first_page_has_next(path, params=None):
             response = original(path, params)
-            if path == "data":
+            if path == "data/":
                 response["next_url"] = "https://api.kolada.se/v3/data?page=2"
             return response
 

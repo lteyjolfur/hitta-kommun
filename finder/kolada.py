@@ -1,9 +1,13 @@
 """Fetch indicators from Kolada (https://www.kolada.se), RKA's open database of kommun statistics.
 
-API v3: GET {base}/kpi/{id}, {base}/kpi?title=..., {base}/data?kpi_id=...&year=...
-Responses are {"values": [...], "next_url": ...}; data rows look like
+API v3 (spec: https://api.kolada.se/v3/openapi.json):
+GET {base}/kpi/{id}, {base}/kpi?title=..., {base}/data/?kpi_id=...&year=...
+Responses are {"values": [...], "next_url": ..., "previous_url": ..., "count": ...};
+data rows look like
 {"kpi": "N00900", "municipality": "0114", "period": 2024,
- "values": [{"gender": "T", "value": 33.1, "status": "", "count": 1}]}.
+ "values": [{"gender": "T", "value": 33.1, "status": "", "count": 1, "isdeleted": false}]}.
+gender is "T" (total), "K", "M", or null for KPIs not divided by gender.
+The title filter is "a space separated list of filter arguments": every word must match.
 
 Everything here takes a `get(path, params) -> dict` callable so tests can
 replace the network with saved responses.
@@ -17,7 +21,9 @@ import urllib.request
 DEFAULT_BASE_URL = "https://api.kolada.se/v3/"
 MIN_COVERAGE = 250  # of 290 kommuner; below this a year is treated as not published yet
 YEARS_BACK = 6
-# KPI municipality_type: "K" kommun only, "L" region only, "A" both.
+# Data rows for both genders together: "T", or null when the KPI isn't divided by gender.
+TOTAL_GENDERS = {"T", None}
+# KPI municipality_type: "K" kommuner (+ national), "L" regions (+ national), "A" all.
 KOMMUN_TYPES = {"K", "A"}
 
 
@@ -92,12 +98,13 @@ def resolve_kpi(get, spec):
 def fetch_year(get, kpi_id, year, kommun_codes):
     """Return {code: value} for one KPI and year, total for both genders, kommuner only."""
     values = {}
-    for row in _all_values(get, "data", {"kpi_id": kpi_id, "year": year, "per_page": 5000}):
+    params = {"kpi_id": kpi_id, "year": year, "region_type": "municipality", "per_page": 5000}
+    for row in _all_values(get, "data/", params):
         code = row.get("municipality")
         if code not in kommun_codes:
             continue  # "0000" (Riket), län, or groups
         for entry in row.get("values", []):
-            if entry.get("gender", "T") == "T" and entry.get("value") is not None and not entry.get("isdeleted"):
+            if entry.get("gender") in TOTAL_GENDERS and entry.get("value") is not None and not entry.get("isdeleted"):
                 values[code] = float(entry["value"])
     return values
 
