@@ -53,6 +53,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# OpenStreetMap's tile servers block requests without a Referer, and Django's
+# default ("same-origin") strips it on cross-origin requests. This sends only
+# the origin (no path) to other sites.
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
 # The database is rebuilt from data/*.csv on every deploy (see build.sh), so a
 # local SQLite file is enough: the app only reads from it at runtime.
 DATABASES = {
