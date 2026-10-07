@@ -172,6 +172,7 @@ class DataFileTests(TempDirMixin, SimpleTestCase):
             [self.indicator(kolada={})],
             [self.indicator(derived={"numerator": "theft", "denominator": "x"})],
             [self.indicator(file=DROP, derived={"numerator": "nope", "denominator": "theft"})],
+            [self.indicator(slug="r", file=DROP, derived={"numerator": "theft", "denominator": "theft", "scale": 0})],
             {"not": "a list"},
         ]
         for content in bad:

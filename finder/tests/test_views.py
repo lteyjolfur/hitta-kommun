@@ -142,6 +142,14 @@ class LoadDataTests(TestCase):
         with self.assertRaisesRegex(CommandError, "outside the plausible range"):
             self.load()
 
+    def test_derived_scale_converts_units(self):
+        self.indicators[3]["derived"]["scale"] = 1000  # price in tkr, income in kr
+        self.write_indicators()
+        (self.data / "values" / "income.csv").write_text("code,value\n0114,270000\n1440,250000\n")
+        self.load()
+        ratios = dict(Value.objects.filter(indicator_id="ratio").values_list("kommun_id", "value"))
+        self.assertAlmostEqual(ratios["0114"], 5396 / 270)
+
     def test_rejects_derived_value_outside_range(self):
         # income accidentally in kr instead of tkr -> ratio ~0.01, outside [0.5, 50]
         self.indicators[3]["range"] = [0.5, 50]

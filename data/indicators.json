@@ -80,25 +80,26 @@
   {
     "slug": "price-to-income",
     "name": "Småhuspris i förhållande till inkomst",
-    "unit": "medelpris / medianinkomst (antal årsinkomster)",
+    "unit": "medelpris / mediannettoinkomst (antal årsinkomster efter skatt)",
     "year": null,
     "lower_is_better": true,
-    "source": "Beräknat: SCB småhuspriser / Kolada medianinkomst",
+    "source": "Beräknat: SCB småhuspriser (tkr) / Kolada mediannettoinkomst (kr)",
     "source_url": "",
     "dimension": "housing",
     "range": [
       0.5,
-      40
+      80
     ],
     "derived": {
       "numerator": "house-price",
-      "denominator": "median-income"
+      "denominator": "median-income",
+      "scale": 1000
     }
   },
   {
     "slug": "median-income",
-    "name": "Medianinkomst",
-    "unit": "sammanräknad förvärvsinkomst, median",
+    "name": "Medianinkomst efter skatt",
+    "unit": "kr per invånare 20+ år (nettoinkomst, median)",
     "year": null,
     "lower_is_better": false,
     "source": "Kolada (RKA)",
@@ -106,11 +107,11 @@
     "file": "values/median-income.csv",
     "dimension": "economy",
     "range": [
-      100,
-      1000000
+      100000,
+      800000
     ],
     "kolada": {
-      "search": "förvärvsinkomst"
+      "search": "Mediannettoinkomst, kr/inv 20+"
     }
   },
   {

@@ -233,9 +233,16 @@ def read_indicators_json(path, dimension_slugs=None):
                 raise SourceError(f"{where}: kolada.search must be a non-empty string")
         if "derived" in item:
             derived = item["derived"]
-            if not isinstance(derived, dict) or set(derived) != {"numerator", "denominator"}:
-                raise SourceError(f"{where}: derived needs exactly 'numerator' and 'denominator'")
-            for part in derived.values():
+            if not isinstance(derived, dict) or not {"numerator", "denominator"} <= set(derived) <= {
+                "numerator",
+                "denominator",
+                "scale",
+            }:
+                raise SourceError(f"{where}: derived needs 'numerator' and 'denominator', and may have 'scale'")
+            scale = derived.get("scale", 1)
+            if isinstance(scale, bool) or not isinstance(scale, (int, float)) or scale <= 0:
+                raise SourceError(f"{where}: derived.scale must be a positive number")
+            for part in (derived["numerator"], derived["denominator"]):
                 if part not in slugs or part == item["slug"] or "derived" in indicators[slugs.index(part)]:
                     raise SourceError(f"{where}: derived must refer to other, non-derived indicators, not {part!r}")
         seen.add(item["slug"])

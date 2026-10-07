@@ -14,10 +14,15 @@ from finder.sources import (
 INDICATOR_MODEL_FIELDS = {"slug", "name", "unit", "year", "lower_is_better", "source", "source_url"}
 
 
-def derive(numerator, denominator):
-    """{code: numerator / denominator} for kommuner that have both (and a non-zero denominator)."""
+def derive(numerator, denominator, scale=1):
+    """{code: numerator / denominator * scale} for kommuner that have both (and a non-zero denominator).
+
+    scale converts units, e.g. 1000 for a price in tkr over an income in kr.
+    """
     return {
-        code: numerator[code] / denominator[code] for code in numerator.keys() & denominator.keys() if denominator[code]
+        code: numerator[code] / denominator[code] * scale
+        for code in numerator.keys() & denominator.keys()
+        if denominator[code]
     }
 
 
@@ -51,7 +56,9 @@ class Command(BaseCommand):
             for meta in indicators:
                 if "derived" in meta:
                     parts = meta["derived"]
-                    values[meta["slug"]] = derive(values[parts["numerator"]], values[parts["denominator"]])
+                    values[meta["slug"]] = derive(
+                        values[parts["numerator"]], values[parts["denominator"]], parts.get("scale", 1)
+                    )
             for meta in indicators:
                 check_range(meta, values[meta["slug"]])
         except (SourceError, OSError, ValueError) as exc:
