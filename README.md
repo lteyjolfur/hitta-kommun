@@ -18,7 +18,7 @@ Dimensions live in `data/dimensions.json`, indicators in `data/indicators.json`.
 
 | Dimension | Indicator | Source | Status |
 |---|---|---|---|
-| Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | MSB, *Öppna jämförelser: trygghet och säkerhet 2023* (Brå) | loaded |
+| Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | SKR and MSB, *Öppna jämförelser: Trygghet och säkerhet 2023*, table appendix indicators A3–A5 (data from Brå) | loaded |
 | Boendekostnad | Average small-house price 2025 | SCB, *Fastighetspriser och lagfarter* | loaded |
 | Boendekostnad | Small-house price per m² (N07909) | Kolada (data from SCB) | after the first Kolada import |
 | Boendekostnad | House price / median income | computed when loading | after the first Kolada import |
@@ -104,7 +104,10 @@ spec, a `dimension` and a plausible `range`, then run the import.
 
 ### Crime (Öppna jämförelser)
 
-Download the yearly *Öppna jämförelser: trygghet och säkerhet* workbook, then:
+SKR and MSB publish *Öppna jämförelser: Trygghet och säkerhet* yearly, with a
+table appendix for all 290 kommuner (indicators A1–A13). The converter reads
+A3 (våldsbrott), A4 (stöld- och tillgreppsbrott) and A5 (skadegörelse) from
+the sheet *Indikatorer i bostavsordning*. Download the workbook, then:
 
 ```bash
 python manage.py convert_crime raw/oppna-jamforelser-2023.xlsx

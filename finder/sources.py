@@ -18,7 +18,7 @@ class SourceError(ValueError):
     pass
 
 
-# --- Öppna jämförelser: Trygghet och säkerhet (crime per 1,000 inhabitants) ---
+# --- SKR/MSB Öppna jämförelser: Trygghet och säkerhet, table appendix A3–A5 (crime per 1,000) ---
 
 CRIME_SHEET = "Indikatorer i bostavsordning"  # sic, as named in the workbook
 CRIME_COLUMNS = {

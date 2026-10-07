@@ -5,7 +5,7 @@ from finder.sources import SourceError, parse_crime_workbook, write_values_csv
 
 
 class Command(BaseCommand):
-    help = "Convert the Öppna jämförelser Trygghet och säkerhet workbook (.xlsx) into data/values/*.csv."
+    help = "Convert the SKR/MSB Öppna jämförelser Trygghet och säkerhet table appendix (.xlsx), A3–A5, into data/values/*.csv."
 
     def add_arguments(self, parser):
         parser.add_argument("workbook", help="path to the downloaded .xlsx")
