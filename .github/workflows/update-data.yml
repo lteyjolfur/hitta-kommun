@@ -19,10 +19,10 @@ concurrency:
 
 jobs:
   kolada:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # pinned; ubuntu-latest moves to 26.04 from Oct 2026
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version-file: .python-version
           cache: pip
@@ -54,7 +54,7 @@ jobs:
             echo "and the app's tests pass with the new data. Check the medians against last year before merging."
           } > "$RUNNER_TEMP/body.md"
 
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: data/kolada-update
           commit-message: "chore(data): update Kolada indicators"
