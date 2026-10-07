@@ -18,7 +18,7 @@ Dimensions live in `data/dimensions.json`, indicators in `data/indicators.json`.
 
 | Dimension | Indicator | Source | Status |
 |---|---|---|---|
-| Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | SKR and MSB, *Öppna jämförelser: Trygghet och säkerhet 2023*, table appendix indicators A3–A5 (data from Brå) | loaded |
+| Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | SKR and MSB, [*Öppna jämförelser: Trygghet och säkerhet 2023*](https://skr.se/statistikochanalys/jamforelsertrygghetochsakerhet.9665.html), table appendix indicators A3–A5 (data from Brå) | loaded |
 | Boendekostnad | Average small-house price 2025 | SCB, *Fastighetspriser och lagfarter* | loaded |
 | Boendekostnad | Small-house price per m² (N07909) | Kolada (data from SCB) | after the first Kolada import |
 | Boendekostnad | House price / median income | computed when loading | after the first Kolada import |
