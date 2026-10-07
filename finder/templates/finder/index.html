@@ -14,27 +14,27 @@
     <aside class="panel">
       <header>
         <h1>Hitta din kommun</h1>
-        <p class="lede">Välj vad som är viktigt för dig. Kartan och listan visar vilka kommuner som passar bäst.</p>
+        <p class="lede">Välj hur viktigt varje område är för dig. Kartan och listan visar vilka kommuner som passar bäst.</p>
       </header>
 
       <form id="weights" class="weights" aria-label="Viktning">
-        {% for ind in indicators %}
-        <div class="weight{% if not ind.has_data %} weight--empty{% endif %}">
-          <label for="w_{{ ind.slug }}">
-            <span class="weight__name">{{ ind.name }}</span>
-            <output for="w_{{ ind.slug }}" id="o_{{ ind.slug }}"></output>
+        {% for dim in dimensions %}
+        <div class="weight{% if not dim.has_data %} weight--empty{% endif %}">
+          <label for="w_{{ dim.slug }}">
+            <span class="weight__name">{{ dim.name }}</span>
+            <output for="w_{{ dim.slug }}" id="o_{{ dim.slug }}"></output>
           </label>
-          <input type="range" id="w_{{ ind.slug }}" name="w_{{ ind.slug }}"
+          <input type="range" id="w_{{ dim.slug }}" name="w_{{ dim.slug }}"
                  min="0" max="{{ max_weight }}" step="1"
-                 value="{% if ind.has_data %}5{% else %}0{% endif %}"
-                 {% if not ind.has_data %}disabled{% endif %}>
-          <p class="weight__meta">
-            {% if ind.has_data %}
-              {% if ind.lower_is_better %}Lägre är bättre{% else %}Högre är bättre{% endif %} · {{ ind.unit }}
-            {% else %}
-              Ingen data inlagd ännu
-            {% endif %}
-          </p>
+                 value="{% if dim.has_data %}{{ default_weight }}{% else %}0{% endif %}"
+                 {% if not dim.has_data %}disabled{% endif %}>
+          <ul class="weight__parts">
+            {% for ind in dim.indicators %}
+            <li{% if not ind.has_data %} class="missing"{% endif %}>
+              {{ ind.name }}{% if ind.has_data %} <span class="hint">({% if ind.lower_is_better %}lägre{% else %}högre{% endif %} är bättre)</span>{% else %} <span class="hint">– data saknas ännu</span>{% endif %}
+            </li>
+            {% endfor %}
+          </ul>
         </div>
         {% empty %}
         <p>Ingen data inlagd. Kör <code>python manage.py load_data</code>.</p>
@@ -50,9 +50,9 @@
       <footer class="sources">
         <h2>Källor</h2>
         <ul>
-          {% for ind in indicators %}{% if ind.has_data %}
-          <li>{{ ind.name }}: {% if ind.source_url %}<a href="{{ ind.source_url }}">{{ ind.source }}</a>{% else %}{{ ind.source }}{% endif %}</li>
-          {% endif %}{% endfor %}
+          {% for dim in dimensions %}{% for ind in dim.indicators %}{% if ind.has_data %}
+          <li>{{ ind.name }}{% if ind.year %} ({{ ind.year }}){% endif %}: {% if ind.source_url %}<a href="{{ ind.source_url }}">{{ ind.source }}</a>{% else %}{{ ind.source }}{% endif %}</li>
+          {% endif %}{% endfor %}{% endfor %}
           <li>Kommungränser: &lt;KÄLLA SAKNAS – fyll i före publicering&gt;</li>
         </ul>
         <p>Anmälda brott visar inte all brottslighet och påverkas av t.ex. turism och pendling.</p>
@@ -66,7 +66,7 @@
     </section>
   </main>
 
-  {{ indicators|json_script:"indicators-data" }}
+  {{ dimensions|json_script:"dimensions-data" }}
   <script src="{% static 'finder/vendor/leaflet/leaflet.js' %}"></script>
   <script>
     window.KOMMUN_GEOJSON_URL = "{% static 'finder/kommuner.geojson' %}";

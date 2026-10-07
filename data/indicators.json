@@ -7,7 +7,12 @@
     "lower_is_better": true,
     "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
     "source_url": "",
-    "file": "values/violent-crime.csv"
+    "file": "values/violent-crime.csv",
+    "dimension": "safety",
+    "range": [
+      0,
+      100
+    ]
   },
   {
     "slug": "theft",
@@ -17,7 +22,12 @@
     "lower_is_better": true,
     "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
     "source_url": "",
-    "file": "values/theft.csv"
+    "file": "values/theft.csv",
+    "dimension": "safety",
+    "range": [
+      0,
+      300
+    ]
   },
   {
     "slug": "vandalism",
@@ -27,7 +37,12 @@
     "lower_is_better": true,
     "source": "MSB, Öppna jämförelser: trygghet och säkerhet 2023 (data från Brå:s kriminalstatistik)",
     "source_url": "",
-    "file": "values/vandalism.csv"
+    "file": "values/vandalism.csv",
+    "dimension": "safety",
+    "range": [
+      0,
+      300
+    ]
   },
   {
     "slug": "house-price",
@@ -37,6 +52,119 @@
     "lower_is_better": true,
     "source": "SCB, Fastighetspriser och lagfarter 2025 (småhus för permanent boende)",
     "source_url": "https://www.statistikdatabasen.scb.se/",
-    "file": "values/house-price.csv"
+    "file": "values/house-price.csv",
+    "dimension": "housing",
+    "range": [
+      100,
+      50000
+    ]
+  },
+  {
+    "slug": "price-to-income",
+    "name": "Småhuspris i förhållande till inkomst",
+    "unit": "medelpris / medianinkomst (antal årsinkomster)",
+    "year": null,
+    "lower_is_better": true,
+    "source": "Beräknat: SCB småhuspriser / Kolada medianinkomst",
+    "source_url": "",
+    "dimension": "housing",
+    "range": [
+      0.5,
+      40
+    ],
+    "derived": {
+      "numerator": "house-price",
+      "denominator": "median-income"
+    }
+  },
+  {
+    "slug": "median-income",
+    "name": "Medianinkomst",
+    "unit": "tkr, sammanräknad förvärvsinkomst",
+    "year": null,
+    "lower_is_better": false,
+    "source": "Kolada (RKA)",
+    "source_url": "https://www.kolada.se/",
+    "file": "values/median-income.csv",
+    "dimension": "economy",
+    "range": [
+      100,
+      1000
+    ],
+    "kolada": {
+      "search": "medianinkomst"
+    }
+  },
+  {
+    "slug": "unemployment",
+    "name": "Arbetslöshet",
+    "unit": "% av befolkningen",
+    "year": null,
+    "lower_is_better": true,
+    "source": "Kolada (RKA)",
+    "source_url": "https://www.kolada.se/",
+    "file": "values/unemployment.csv",
+    "dimension": "economy",
+    "range": [
+      0,
+      40
+    ],
+    "kolada": {
+      "search": "arbetslöshet"
+    }
+  },
+  {
+    "slug": "tax-rate",
+    "name": "Skattesats",
+    "unit": "%, kommunal + regional",
+    "year": null,
+    "lower_is_better": true,
+    "source": "Kolada (RKA)",
+    "source_url": "https://www.kolada.se/",
+    "file": "values/tax-rate.csv",
+    "dimension": "economy",
+    "range": [
+      25,
+      40
+    ],
+    "kolada": {
+      "kpi": "N00900"
+    }
+  },
+  {
+    "slug": "merit-value",
+    "name": "Meritvärde årskurs 9",
+    "unit": "genomsnittligt meritvärde",
+    "year": null,
+    "lower_is_better": false,
+    "source": "Kolada (RKA)",
+    "source_url": "https://www.kolada.se/",
+    "file": "values/merit-value.csv",
+    "dimension": "schools",
+    "range": [
+      100,
+      340
+    ],
+    "kolada": {
+      "search": "meritvärde"
+    }
+  },
+  {
+    "slug": "gymnasium-eligible",
+    "name": "Behörighet till gymnasiet",
+    "unit": "% av eleverna i årskurs 9",
+    "year": null,
+    "lower_is_better": false,
+    "source": "Kolada (RKA)",
+    "source_url": "https://www.kolada.se/",
+    "file": "values/gymnasium-eligible.csv",
+    "dimension": "schools",
+    "range": [
+      0,
+      100
+    ],
+    "kolada": {
+      "search": "behöriga till yrkesprogram"
+    }
   }
 ]

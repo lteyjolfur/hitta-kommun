@@ -5,7 +5,7 @@ const BINS = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const NO_DATA = "#d9d8d4";
 const TOP_N = 15;
 
-const indicators = JSON.parse(document.getElementById("indicators-data").textContent);
+const dimensions = JSON.parse(document.getElementById("dimensions-data").textContent);
 const form = document.getElementById("weights");
 const rankingEl = document.getElementById("ranking");
 const statusEl = document.getElementById("status");
@@ -53,10 +53,17 @@ function style(feature) {
 function tooltipHtml(code, name) {
   const r = byCode.get(code);
   if (!r || r.score == null) return `<strong>${name}</strong><br>Ingen data för valda kriterier`;
-  const lines = indicators
-    .filter((ind) => ind.has_data)
-    .map((ind) => `${ind.name}: ${fmt(r.values[ind.slug])}`);
-  return `<strong>${r.rank}. ${name}</strong> · matchning ${fmt(r.score * 100, 0)}/100<br>${lines.join("<br>")}`;
+  const sections = dimensions
+    .filter((dim) => dim.has_data)
+    .map((dim) => {
+      const part = r.parts[dim.slug];
+      const head = `<span class="tt-dim">${dim.name}${part == null ? "" : ` · ${fmt(part * 100, 0)}/100`}</span>`;
+      const rows = dim.indicators
+        .filter((ind) => ind.has_data)
+        .map((ind) => `${ind.name}: ${fmt(r.values[ind.slug])}`);
+      return [head, ...rows].join("<br>");
+    });
+  return `<strong>${r.rank}. ${name}</strong> · matchning ${fmt(r.score * 100, 0)}/100<br>${sections.join("<br>")}`;
 }
 
 function renderLegend() {
@@ -101,10 +108,10 @@ function focusKommun(code) {
 }
 
 function updateOutputs() {
-  indicators.forEach((ind) => {
-    const input = document.getElementById(`w_${ind.slug}`);
-    const out = document.getElementById(`o_${ind.slug}`);
-    if (input && out) out.textContent = ind.has_data ? input.value : "";
+  dimensions.forEach((dim) => {
+    const input = document.getElementById(`w_${dim.slug}`);
+    const out = document.getElementById(`o_${dim.slug}`);
+    if (input && out) out.textContent = dim.has_data ? input.value : "";
   });
 }
 
@@ -112,9 +119,9 @@ let pending = null;
 async function refresh() {
   updateOutputs();
   const params = new URLSearchParams();
-  indicators
-    .filter((ind) => ind.has_data)
-    .forEach((ind) => params.set(`w_${ind.slug}`, document.getElementById(`w_${ind.slug}`).value));
+  dimensions
+    .filter((dim) => dim.has_data)
+    .forEach((dim) => params.set(`w_${dim.slug}`, document.getElementById(`w_${dim.slug}`).value));
 
   if (pending) pending.abort();
   pending = new AbortController();

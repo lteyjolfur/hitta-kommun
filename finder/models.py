@@ -14,17 +14,33 @@ class Kommun(models.Model):
         return f"{self.code} {self.name}"
 
 
+class Dimension(models.Model):
+    """A group of indicators the user weights with one slider, e.g. "Trygghet"."""
+
+    slug = models.SlugField(primary_key=True)
+    name = models.CharField(max_length=64)
+    description = models.CharField(max_length=255)
+    position = models.PositiveIntegerField(default=0)  # order in data/dimensions.json
+
+    class Meta:
+        ordering = ["position"]
+
+    def __str__(self):
+        return self.name
+
+
 class Indicator(models.Model):
     """A measurable property of a kommun, e.g. reported violent crimes per 1,000."""
 
     slug = models.SlugField(primary_key=True)
     name = models.CharField(max_length=128)
     unit = models.CharField(max_length=64)
-    year = models.PositiveIntegerField()
+    year = models.PositiveIntegerField(null=True)  # null until first imported
     # True when a lower value is what most people would prefer (crime, prices).
     lower_is_better = models.BooleanField()
     source = models.CharField(max_length=255)
     source_url = models.URLField(blank=True)
+    dimension = models.ForeignKey(Dimension, on_delete=models.CASCADE, related_name="indicators")
     position = models.PositiveIntegerField(default=0)  # order in data/indicators.json
 
     class Meta:

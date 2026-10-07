@@ -10,6 +10,7 @@ from finder.sources import (
     SourceError,
     parse_crime_workbook,
     parse_scb_region_csv,
+    read_dimensions_json,
     read_indicators_json,
     read_values_csv,
     write_values_csv,
@@ -136,14 +137,25 @@ class DataFileTests(TempDirMixin, SimpleTestCase):
             "source": "Test",
             "source_url": "",
             "file": "values/theft.csv",
+            "dimension": "safety",
+            "range": [0, 100],
         }
         item.update(overrides)
-        return item
+        return {k: v for k, v in item.items() if v is not DROP}
+
+    def read(self, content):
+        path = self.tmp / "i.json"
+        path.write_text(json.dumps(content))
+        return read_indicators_json(path, {"safety", "housing"})
 
     def test_indicators_json_valid(self):
-        path = self.tmp / "i.json"
-        path.write_text(json.dumps([self.indicator()]))
-        self.assertEqual(read_indicators_json(path)[0]["slug"], "theft")
+        price = self.indicator(slug="price", dimension="housing", file="values/price.csv")
+        income = self.indicator(slug="income", year=None, file="values/income.csv", kolada={"search": "median"})
+        ratio = self.indicator(slug="ratio", file=DROP, derived={"numerator": "price", "denominator": "income"})
+        self.assertEqual(
+            [i["slug"] for i in self.read([self.indicator(), price, income, ratio])],
+            ["theft", "price", "income", "ratio"],
+        )
 
     def test_indicators_json_rejects_bad_entries(self):
         bad = [
@@ -152,10 +164,28 @@ class DataFileTests(TempDirMixin, SimpleTestCase):
             [self.indicator(slug="Bad Slug")],
             [self.indicator(), self.indicator()],
             [{**self.indicator(), "extra": 1}],
+            [self.indicator(dimension="nope")],
+            [self.indicator(range=[5, 1])],
+            [self.indicator(range=None)],
+            [self.indicator(file=DROP)],
+            [self.indicator(kolada={"kpi": "12345"})],
+            [self.indicator(kolada={})],
+            [self.indicator(derived={"numerator": "theft", "denominator": "x"})],
+            [self.indicator(file=DROP, derived={"numerator": "nope", "denominator": "theft"})],
             {"not": "a list"},
         ]
         for content in bad:
-            path = self.tmp / "i.json"
+            with self.subTest(content=content), self.assertRaises(SourceError):
+                self.read(content)
+
+    def test_dimensions_json(self):
+        path = self.tmp / "d.json"
+        path.write_text(json.dumps([{"slug": "safety", "name": "Trygghet", "description": "x"}]))
+        self.assertEqual(read_dimensions_json(path)[0]["name"], "Trygghet")
+        for content in [[], [{"slug": "safety"}], [{"slug": "a", "name": "A", "description": ""}] * 2]:
             path.write_text(json.dumps(content))
             with self.subTest(content=content), self.assertRaises(SourceError):
-                read_indicators_json(path)
+                read_dimensions_json(path)
+
+
+DROP = object()

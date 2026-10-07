@@ -57,7 +57,9 @@ h2 { font-size: 1rem; margin: 24px 0 8px; }
 .weights { display: grid; gap: 14px; }
 .weight label { display: flex; justify-content: space-between; font-weight: 600; }
 .weight input { width: 100%; accent-color: var(--accent); }
-.weight__meta { margin: 0; font-size: 0.85rem; color: var(--ink-muted); }
+.weight__parts { margin: 2px 0 0; padding-left: 1.1em; font-size: 0.85rem; color: var(--ink-muted); }
+.weight__parts .missing { opacity: 0.7; }
+.hint { white-space: nowrap; }
 .weight--empty { opacity: 0.6; }
 
 .ranking { margin: 0; padding-left: 1.75em; }
@@ -106,3 +108,5 @@ h2 { font-size: 1rem; margin: 24px 0 8px; }
   .map-wrap { order: -1; height: 55vh; }
   .panel { border-right: 0; padding: 16px; }
 }
+
+.tt-dim { display: inline-block; margin-top: 4px; font-weight: 600; }

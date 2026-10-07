@@ -1,0 +1,63 @@
+name: Update data
+
+# Fetches the Kolada indicators listed in data/indicators.json, checks them,
+# and opens (or updates) a pull request with the new CSVs. Nothing reaches
+# main without review. Runs monthly; Kolada publishes most kommun statistics
+# once a year, so most runs find nothing new and open no PR.
+on:
+  schedule:
+    - cron: "23 5 3 * *"  # 05:23 UTC on the 3rd of each month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  kolada:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+
+      - name: Import from Kolada
+        run: python manage.py import_kolada --summary "$RUNNER_TEMP/kolada.md"
+
+      # The PR is opened with GITHUB_TOKEN, which does not trigger the CI
+      # workflow, so run the same checks here before opening it.
+      - name: Check the data loads and tests pass
+        run: |
+          python manage.py migrate --no-input
+          python manage.py load_data
+          python manage.py test
+
+      - name: Write PR body
+        run: |
+          {
+            echo "Automatic data update from [Kolada](https://www.kolada.se/) (run by \`.github/workflows/update-data.yml\`)."
+            echo
+            cat "$RUNNER_TEMP/kolada.md"
+            echo
+            echo "Each value was checked against the indicator's plausible range in \`data/indicators.json\`,"
+            echo "and the app's tests pass with the new data. Check the medians against last year before merging."
+          } > "$RUNNER_TEMP/body.md"
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/kolada-update
+          commit-message: "chore(data): update Kolada indicators"
+          title: "chore(data): update Kolada indicators"
+          body-path: ${{ runner.temp }}/body.md
+          add-paths: |
+            data/indicators.json
+            data/values/*.csv
+          delete-branch: true

@@ -1,0 +1,6 @@
+[
+  {"slug": "safety", "name": "Trygghet", "description": "Anmälda våldsbrott, stölder och skadegörelse"},
+  {"slug": "housing", "name": "Boendekostnad", "description": "Småhuspriser, och pris i förhållande till inkomst när inkomstdata finns"},
+  {"slug": "economy", "name": "Ekonomi och jobb", "description": "Inkomst, arbetslöshet och skattesats"},
+  {"slug": "schools", "name": "Skola", "description": "Meritvärde och behörighet till gymnasiet i årskurs 9"}
+]
