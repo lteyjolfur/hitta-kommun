@@ -70,6 +70,7 @@
   <script src="{% static 'finder/vendor/leaflet/leaflet.js' %}"></script>
   <script>
     window.KOMMUN_GEOJSON_URL = "{% static 'finder/kommuner.geojson' %}";
+    window.LAN_GEOJSON_URL = "{% static 'finder/lan.geojson' %}";
     window.RANK_URL = "{% url 'api-rank' %}";
   </script>
   <script src="{% static 'finder/app.js' %}"></script>

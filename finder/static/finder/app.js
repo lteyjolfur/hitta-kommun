@@ -10,11 +10,13 @@ const form = document.getElementById("weights");
 const rankingEl = document.getElementById("ranking");
 const statusEl = document.getElementById("status");
 
-const map = L.map("map", { zoomSnap: 0.25 }).setView([62.5, 16.5], 4.75);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 12,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
+// No background tiles: the kommun shapes cover all of Sweden, and the län
+// outlines drawn on top give the map its structure and coastline.
+const map = L.map("map", { zoomSnap: 0.25, maxZoom: 10, attributionControl: false }).setView([62.5, 16.5], 4.75);
+const css = getComputedStyle(document.documentElement);
+const KOMMUN_LINE = css.getPropertyValue("--map-kommun-line").trim();
+const LAN_LINE = css.getPropertyValue("--map-lan-line").trim();
+const HOVER_LINE = css.getPropertyValue("--ink").trim();
 
 let layer = null;
 let byCode = new Map(); // code -> result from /api/rank
@@ -42,8 +44,8 @@ function style(feature) {
   const bin = binFor(r ? r.score : null);
   return {
     fillColor: bin < 0 ? NO_DATA : BINS[bin],
-    fillOpacity: 0.85,
-    color: "#ffffff",
+    fillOpacity: 1,
+    color: KOMMUN_LINE,
     weight: 0.6,
   };
 }
@@ -141,14 +143,21 @@ async function refresh() {
 
 async function init() {
   renderLegend();
-  const geojson = await (await fetch(window.KOMMUN_GEOJSON_URL)).json();
+  const [geojson, lanGeojson] = await Promise.all(
+    [window.KOMMUN_GEOJSON_URL, window.LAN_GEOJSON_URL].map(async (url) => (await fetch(url)).json()),
+  );
   layer = L.geoJSON(geojson, {
     style,
     onEachFeature: (feature, l) => {
       l.bindTooltip(tooltipHtml(feature.properties.code, feature.properties.name), { sticky: true });
-      l.on("mouseover", () => l.setStyle({ weight: 2, color: "#1f1f1d" }));
+      l.on("mouseover", () => l.setStyle({ weight: 2, color: HOVER_LINE }));
       l.on("mouseout", () => layer.resetStyle(l));
     },
+  }).addTo(map);
+  // Län borders on top; non-interactive so hover still reaches the kommuner.
+  L.geoJSON(lanGeojson, {
+    interactive: false,
+    style: { fill: false, color: LAN_LINE, weight: 1.4, lineJoin: "round" },
   }).addTo(map);
   map.fitBounds(layer.getBounds(), { padding: [8, 8] });
   await refresh();

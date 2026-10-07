@@ -38,7 +38,9 @@ raw downloads (not committed)          data/ (committed, plain CSV/JSON)        
   missing; it never gets a silent zero.
 - `GET /api/rank?w_<indicator>=0..10`: JSON ranking used by the frontend.
 - Frontend: plain JS with Leaflet (vendored in `finder/static/finder/vendor/`).
-  The map uses a 5-step blue quantile scale.
+  The map uses a 5-step blue quantile scale. There are no background tiles:
+  kommun shapes plus län outlines (merged from the kommuner) are the whole map,
+  so the page makes no third-party requests.
 
 ## Run locally
 
@@ -93,8 +95,10 @@ kommun.
 
 ### Map boundaries
 
-`finder/static/finder/kommuner.geojson` and `data/kommuner.csv` were built from a
-SWEREF 99 TM kommun shapefile:
+`finder/static/finder/kommuner.geojson`, `lan.geojson` and `data/kommuner.csv`
+were built from a SWEREF 99 TM kommun shapefile. Shared borders are simplified
+once (a coverage simplification), so neighbouring kommuner still meet exactly.
+Small overlaps in the source are assigned to one kommun and reported:
 
 ```bash
 python manage.py build_geo raw/Kommun_Sweref99TM.shp --tolerance 400

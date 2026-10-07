@@ -5,6 +5,9 @@
   --ink-muted: #5f5e5a;
   --line: #e4e2dd;
   --accent: #256abf;
+  --map-sea: #eef1f4;
+  --map-kommun-line: #ffffff;
+  --map-lan-line: #3d3d3a;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -16,6 +19,9 @@
     --ink-muted: #b4b2ac;
     --line: #383835;
     --accent: #86b6ef;
+    --map-sea: #161615;
+    --map-kommun-line: #1f1f1d;
+    --map-lan-line: #b4b2ac;
   }
 }
 
@@ -74,7 +80,7 @@ h2 { font-size: 1rem; margin: 24px 0 8px; }
 .sources a { color: var(--accent); }
 
 .map-wrap { position: relative; }
-#map { height: 100%; width: 100%; }
+#map { height: 100%; width: 100%; background: var(--map-sea); }
 
 .legend {
   position: absolute;

@@ -43,11 +43,6 @@ class RankApiTests(TestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertIn("error", response.json())
 
-    def test_referrer_policy_lets_map_tiles_see_the_origin(self):
-        # OSM tile servers reject requests that carry no Referer.
-        response = self.client.get("/")
-        self.assertEqual(response["Referrer-Policy"], "strict-origin-when-cross-origin")
-
     def test_index_renders_sliders_and_no_data_state(self):
         html = self.client.get("/").content.decode()
         self.assertIn('id="w_violent-crime"', html)
