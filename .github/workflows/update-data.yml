@@ -30,7 +30,9 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Import from Kolada
-        run: python manage.py import_kolada --summary "$RUNNER_TEMP/kolada.md"
+        # --allow-partial: indicators that pass are written; failures (e.g. an
+        # ambiguous KPI search) are listed in the PR body instead of blocking.
+        run: python manage.py import_kolada --allow-partial --summary "$RUNNER_TEMP/kolada.md"
 
       # The PR is opened with GITHUB_TOKEN, which does not trigger the CI
       # workflow, so run the same checks here before opening it.

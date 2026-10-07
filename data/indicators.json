@@ -98,7 +98,7 @@
   {
     "slug": "median-income",
     "name": "Medianinkomst",
-    "unit": "tkr, sammanräknad förvärvsinkomst",
+    "unit": "sammanräknad förvärvsinkomst, median",
     "year": null,
     "lower_is_better": false,
     "source": "Kolada (RKA)",
@@ -107,10 +107,10 @@
     "dimension": "economy",
     "range": [
       100,
-      1000
+      1000000
     ],
     "kolada": {
-      "search": "medianinkomst"
+      "search": "förvärvsinkomst"
     }
   },
   {
@@ -128,7 +128,7 @@
       40
     ],
     "kolada": {
-      "search": "arbetslöshet"
+      "search": "sökande i program"
     }
   },
   {
@@ -152,7 +152,7 @@
   {
     "slug": "merit-value",
     "name": "Meritvärde årskurs 9",
-    "unit": "genomsnittligt meritvärde",
+    "unit": "genomsnittligt meritvärde (17 ämnen), skolor i kommunen",
     "year": null,
     "lower_is_better": false,
     "source": "Kolada (RKA)",
@@ -164,13 +164,13 @@
       340
     ],
     "kolada": {
-      "search": "meritvärde"
+      "kpi": "N15504"
     }
   },
   {
     "slug": "gymnasium-eligible",
-    "name": "Behörighet till gymnasiet",
-    "unit": "% av eleverna i årskurs 9",
+    "name": "Behörighet till gymnasiet (yrkesprogram)",
+    "unit": "% av eleverna i åk 9, skolor i kommunen",
     "year": null,
     "lower_is_better": false,
     "source": "Kolada (RKA)",
@@ -182,7 +182,7 @@
       100
     ],
     "kolada": {
-      "search": "behöriga till yrkesprogram"
+      "kpi": "N15424"
     }
   }
 ]

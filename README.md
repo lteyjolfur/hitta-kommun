@@ -85,7 +85,9 @@ python manage.py import_kolada --only tax-rate
 
 For each indicator it takes the newest year that covers at least 250 kommuner,
 checks every value against `range` and writes `data/values/<slug>.csv`. If any
-indicator fails, nothing is written.
+indicator fails, nothing is written, unless you pass `--allow-partial` (used by
+the GitHub Action), which writes the indicators that passed and lists the
+failures in the summary.
 
 An indicator can name its KPI (`"kpi": "N00900"`) or a title to search for
 (`"search": "medianinkomst"`). A search must match exactly one kommun KPI;

@@ -145,7 +145,33 @@ class ImportCommandTests(SimpleTestCase):
             mock.patch.object(kolada, "MIN_COVERAGE", 3),
             mock.patch.object(kolada, "http_getter", return_value=fake),
         ):
-            call_command("import_kolada", "--year", "2025", *args, stdout=io.StringIO())
+            call_command("import_kolada", "--year", "2025", *args, stdout=io.StringIO(), stderr=io.StringIO())
+
+    def add_unresolvable_indicator(self):
+        self.indicators.append(
+            {**self.indicators[0], "slug": "income", "file": "values/income.csv", "kolada": {"search": "nope"}}
+        )
+        (self.data / "indicators.json").write_text(json.dumps(self.indicators))
+
+    def test_one_failure_blocks_all_by_default(self):
+        self.add_unresolvable_indicator()
+        fake = FakeKolada({"N00900": TAX}, {("N00900", 2025): [data_row(c, 32.5) for c in KOMMUNER]})
+        with self.assertRaisesRegex(CommandError, "income: search 'nope' matched 0"):
+            self.run_import(fake)
+        self.assertFalse((self.data / "values" / "tax-rate.csv").exists())
+
+    def test_allow_partial_writes_what_passed_and_reports_the_rest(self):
+        self.add_unresolvable_indicator()
+        fake = FakeKolada({"N00900": TAX}, {("N00900", 2025): [data_row(c, 32.5) for c in KOMMUNER]})
+        summary = self.data / "summary.md"
+        self.run_import(fake, "--allow-partial", "--summary", str(summary))
+        self.assertTrue((self.data / "values" / "tax-rate.csv").exists())
+        self.assertFalse((self.data / "values" / "income.csv").exists())
+        self.assertIn("Kunde inte hämtas (1)", summary.read_text())
+
+    def test_allow_partial_still_fails_when_nothing_passed(self):
+        with self.assertRaises(CommandError):
+            self.run_import(FakeKolada(), "--allow-partial")
 
     def test_writes_values_pins_kpi_and_sets_year(self):
         fake = FakeKolada({"N00900": TAX}, {("N00900", 2025): [data_row(c, 32.5) for c in KOMMUNER]})

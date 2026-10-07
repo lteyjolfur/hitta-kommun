@@ -28,8 +28,13 @@ class Command(BaseCommand):
         parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
         parser.add_argument("--summary", help="also write a Markdown summary of the changes to this file")
         parser.add_argument("--year", type=int, default=datetime.date.today().year, help="newest year to try")
+        parser.add_argument(
+            "--allow-partial",
+            action="store_true",
+            help="write the indicators that passed and list the failures in the summary (fails if none passed)",
+        )
 
-    def handle(self, only, base_url, summary, year, **options):
+    def handle(self, only, base_url, summary, year, allow_partial, **options):
         get = kolada.http_getter(base_url)  # tests patch finder.kolada.http_getter
         data_dir = settings.DATA_DIR
         try:
@@ -44,7 +49,7 @@ class Command(BaseCommand):
         if unknown:
             raise CommandError(f"not Kolada indicators: {sorted(unknown)}")
 
-        # Fetch and check everything first; write only if all indicators pass.
+        # Fetch and check everything first; by default write only if all indicators pass.
         fetched, errors = [], []
         for meta in targets:
             try:
@@ -59,7 +64,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"{meta['slug']}: {kpi_id} {title!r}, {data_year}, {len(values)} kommuner")
             except KoladaError as exc:
                 errors.append(f"{meta['slug']}: {exc}")
-        if errors:
+        if errors and not (allow_partial and fetched):
             raise CommandError("Kolada import failed, nothing written:\n" + "\n".join(errors))
 
         lines = ["| Indikator | KPI | År | Kommuner | Median | Förra medianen |", "|---|---|---|---|---|---|"]
@@ -77,7 +82,10 @@ class Command(BaseCommand):
             meta["source"] = f"Kolada (RKA), {kpi_id}: {title}"
         write_indicators_json(data_dir / "indicators.json", indicators)
 
+        if errors:
+            lines += ["", f"### Kunde inte hämtas ({len(errors)})", "", "```", *errors, "```"]
+            self.stderr.write("not imported:\n" + "\n".join(errors))
         if summary:
             with open(summary, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines) + "\n")
-        self.stdout.write(f"wrote {len(fetched)} indicators")
+        self.stdout.write(f"wrote {len(fetched)} indicators, {len(errors)} failed")
