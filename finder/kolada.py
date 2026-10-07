@@ -17,6 +17,8 @@ import urllib.request
 DEFAULT_BASE_URL = "https://api.kolada.se/v3/"
 MIN_COVERAGE = 250  # of 290 kommuner; below this a year is treated as not published yet
 YEARS_BACK = 6
+# KPI municipality_type: "K" kommun only, "L" region only, "A" both.
+KOMMUN_TYPES = {"K", "A"}
 
 
 class KoladaError(RuntimeError):
@@ -56,9 +58,10 @@ def _all_values(get, path, params=None):
 def resolve_kpi(get, spec):
     """Return (kpi_id, title) for a {"kpi": ...} and/or {"search": ...} spec.
 
-    With only a search term, exactly one kommun-level KPI must match; otherwise
-    the error lists the candidates so the right id can be pinned in
-    data/indicators.json.
+    With only a search term, exactly one KPI with kommun data must match;
+    otherwise the error lists the candidates so the right id can be pinned in
+    data/indicators.json. With both, the pinned KPI's title must contain the
+    search term, which catches a wrong or reused id.
     """
     if "kpi" in spec:
         response = get(f"kpi/{spec['kpi']}")
@@ -66,12 +69,18 @@ def resolve_kpi(get, spec):
         rows = response.get("values", [response] if "id" in response else [])
         if not rows:
             raise KoladaError(f"Kolada has no KPI {spec['kpi']}")
-        return rows[0]["id"], rows[0]["title"]
+        kpi_id, title = rows[0]["id"], rows[0]["title"]
+        if "search" in spec and spec["search"].lower() not in title.lower():
+            raise KoladaError(f"{kpi_id} is titled {title!r}, which does not contain {spec['search']!r}")
+        return kpi_id, title
 
     rows = _all_values(get, "kpi", {"title": spec["search"]})
-    candidates = [r for r in rows if r.get("municipality_type", "K") == "K"]
+    candidates = [r for r in rows if r.get("municipality_type", "K") in KOMMUN_TYPES]
     if len(candidates) == 1:
         return candidates[0]["id"], candidates[0]["title"]
+    if not candidates and rows:
+        other = ", ".join(f"{r['id']} ({r.get('municipality_type')}): {r['title']}" for r in rows[:5])
+        raise KoladaError(f"search {spec['search']!r} only matched KPIs without kommun data: {other}")
     listing = "\n".join(f"  {r['id']}: {r['title']}" for r in candidates[:15])
     more = f"\n  ... and {len(candidates) - 15} more" if len(candidates) > 15 else ""
     raise KoladaError(

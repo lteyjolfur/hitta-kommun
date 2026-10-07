@@ -55,6 +55,22 @@ class AdapterTests(SimpleTestCase):
     def test_resolve_by_id_accepts_bare_object(self):
         self.assertEqual(kolada.resolve_kpi(lambda path, params=None: TAX, {"kpi": "N00900"})[0], "N00900")
 
+    def test_pinned_id_must_match_search_title(self):
+        with self.assertRaisesRegex(kolada.KoladaError, "does not contain 'medianinkomst'"):
+            kolada.resolve_kpi(FakeKolada({"N00900": TAX}), {"kpi": "N00900", "search": "medianinkomst"})
+        self.assertEqual(
+            kolada.resolve_kpi(FakeKolada({"N00900": TAX}), {"kpi": "N00900", "search": "skattesats"})[0], "N00900"
+        )
+
+    def test_search_includes_kpis_for_both_kommun_and_region(self):
+        kpis = {"N00905": {"id": "N00905", "title": "Mediannettoinkomst, kr/inv 20+", "municipality_type": "A"}}
+        self.assertEqual(kolada.resolve_kpi(FakeKolada(kpis), {"search": "mediannettoinkomst"})[0], "N00905")
+
+    def test_search_matching_only_region_kpis_says_so(self):
+        kpis = {"R1": {"id": "R1", "title": "Medianinkomst region", "municipality_type": "L"}}
+        with self.assertRaisesRegex(kolada.KoladaError, "only matched KPIs without kommun data"):
+            kolada.resolve_kpi(FakeKolada(kpis), {"search": "medianinkomst"})
+
     def test_unknown_id(self):
         with self.assertRaisesRegex(kolada.KoladaError, "no KPI"):
             kolada.resolve_kpi(FakeKolada(), {"kpi": "N99999"})
