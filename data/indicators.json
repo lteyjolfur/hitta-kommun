@@ -118,10 +118,10 @@
   {
     "slug": "unemployment",
     "name": "Arbetslöshet",
-    "unit": "% av befolkningen 16–65 år, årsmedelvärde",
-    "year": null,
+    "unit": "% av befolkningen 18–65 år, årsmedelvärde",
+    "year": 2025,
     "lower_is_better": true,
-    "source": "Kolada (RKA)",
+    "source": "Kolada (RKA), N03920: Arbetslösa av befolkningen, 18-65 år, andel (%)",
     "source_url": "https://www.kolada.se/",
     "file": "values/unemployment.csv",
     "dimension": "economy",
@@ -130,7 +130,7 @@
       40
     ],
     "kolada": {
-      "search": "Arbetslöshet 16-65"
+      "kpi": "N03920"
     }
   },
   {
