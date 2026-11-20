@@ -12,8 +12,9 @@ score.
 
 ## Dimensions and indicators
 
-Each slider weights a **dimension**. A dimension's score is the plain mean of
-its indicators, so adding an indicator never gives a dimension more weight.
+Each slider weights a **dimension**. A dimension's score is the mean of its
+indicators (equal by default, adjustable with the smaller indicator sliders),
+so adding an indicator never gives a dimension more weight.
 Dimensions live in `data/dimensions.json`, indicators in `data/indicators.json`.
 
 | Dimension | Indicator | Source | Status |
@@ -48,7 +49,10 @@ raw downloads (not committed)          data/ (committed, plain CSV/JSON)        
 - `load_data` checks every value against the indicator's plausible `range` and
   computes `derived` indicators (e.g. price / income). It fails rather than load
   data that looks wrong, such as income in kr instead of tkr.
-- `GET /api/rank?w_<dimension>=0..10`: JSON ranking used by the frontend.
+- `GET /api/rank?w_<dimension>=0..10&wi_<indicator>=0..10`: JSON ranking used
+  by the frontend. Indicator weights default to equal; a dimension with two or
+  more loaded indicators (today: the three crime types under Trygghet) gets a
+  slider per indicator in the UI.
 - Frontend: plain JS with Leaflet (vendored in `finder/static/finder/vendor/`).
   The map uses a 5-step blue quantile scale. There are no background tiles:
   kommun shapes plus län outlines (merged from the kommuner) are the whole map,

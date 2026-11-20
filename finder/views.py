@@ -35,6 +35,8 @@ def _catalog():
             "description": dim.description,
             "indicators": indicators_by_dim[dim.slug],
             "has_data": any(i["has_data"] for i in indicators_by_dim[dim.slug]),
+            # One slider per indicator only when there is something to balance.
+            "indicator_sliders": sum(i["has_data"] for i in indicators_by_dim[dim.slug]) >= 2,
         }
         for dim in Dimension.objects.all()
     ]
@@ -45,25 +47,34 @@ def index(request):
     return render(
         request,
         "finder/index.html",
-        {"dimensions": _catalog(), "max_weight": MAX_WEIGHT, "default_weight": DEFAULT_WEIGHT},
+        {
+            "dimensions": _catalog(),
+            "max_weight": MAX_WEIGHT,
+            "default_weight": DEFAULT_WEIGHT,
+        },
     )
 
 
-def parse_weights(params, slugs):
-    """Read w_<dimension>=<0..MAX_WEIGHT> query params. Returns (weights, error)."""
+def parse_weights(params, slugs, prefix="w_", default="0", kind="dimension"):
+    """Read <prefix><slug>=<0..MAX_WEIGHT> query params. Returns (weights, error).
+
+    Dimensions use w_<dimension> (default 0: a dimension counts only once its
+    slider is moved). Indicators use wi_<indicator> (default 1: indicators in
+    a dimension count equally unless the user says otherwise).
+    """
     weights = {}
     for slug in slugs:
-        raw = params.get(f"w_{slug}", "0")
+        raw = params.get(f"{prefix}{slug}", default)
         try:
             weight = float(raw)
         except ValueError:
-            return None, f"w_{slug} must be a number"
+            return None, f"{prefix}{slug} must be a number"
         if not 0 <= weight <= MAX_WEIGHT:
-            return None, f"w_{slug} must be between 0 and {MAX_WEIGHT}"
+            return None, f"{prefix}{slug} must be between 0 and {MAX_WEIGHT}"
         weights[slug] = weight
-    unknown = sorted(k for k in params if k.startswith("w_") and k[2:] not in slugs)
+    unknown = sorted(k for k in params if k.startswith(prefix) and k[len(prefix) :] not in slugs)
     if unknown:
-        return None, f"unknown dimension(s): {', '.join(unknown)}"
+        return None, f"unknown {kind}(s): {', '.join(unknown)}"
     return weights, None
 
 
@@ -75,6 +86,11 @@ def api_rank(request):
         return JsonResponse({"error": error}, status=400)
 
     indicators = list(Indicator.objects.all())
+    indicator_weights, error = parse_weights(
+        request.GET, [i.slug for i in indicators], prefix="wi_", default="1", kind="indicator"
+    )
+    if error:
+        return JsonResponse({"error": error}, status=400)
     values = defaultdict(dict)
     for slug, code, value in Value.objects.values_list("indicator_id", "kommun_id", "value"):
         values[slug][code] = value
@@ -85,6 +101,7 @@ def api_rank(request):
         values=values,
         lower_is_better={i.slug: i.lower_is_better for i in indicators},
         dimension_of={i.slug: i.dimension_id for i in indicators},
+        indicator_weights=indicator_weights,
     )
     results = rank(list(names), dim_scores, weights)
     return JsonResponse(

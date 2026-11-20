@@ -17,8 +17,11 @@ def seed():
     meta = {"unit": "u", "year": 2022, "lower_is_better": True, "source": "Test"}
     crime = Indicator.objects.create(slug="violent-crime", name="Våld", dimension_id="safety", **meta)
     Indicator.objects.create(slug="house-price", name="Pris", dimension_id="housing", position=1, **meta)
+    theft = Indicator.objects.create(slug="theft", name="Stöld", dimension_id="safety", position=2, **meta)
     for code, value in [("0114", 11.0), ("0115", 5.0), ("1440", 8.0)]:
         Value.objects.create(kommun_id=code, indicator=crime, value=value)
+    for code, value in [("0114", 10.0), ("0115", 40.0), ("1440", 20.0)]:
+        Value.objects.create(kommun_id=code, indicator=theft, value=value)
 
 
 class RankApiTests(TestCase):
@@ -26,18 +29,39 @@ class RankApiTests(TestCase):
         seed()
 
     def test_ranks_by_weighted_dimension(self):
-        data = self.client.get("/api/rank", {"w_safety": 5}).json()["results"]
+        data = self.client.get("/api/rank", {"w_safety": 5, "wi_theft": 0}).json()["results"]
         self.assertEqual([r["code"] for r in data], ["0115", "1440", "0114"])
         self.assertEqual(data[0]["score"], 1)
         self.assertEqual(data[0]["parts"], {"safety": 1})
-        self.assertEqual(data[0]["values"], {"violent-crime": 5.0, "house-price": None})
+        self.assertEqual(data[0]["values"], {"violent-crime": 5.0, "house-price": None, "theft": 40.0})
+
+    def test_indicator_weights_change_the_ranking(self):
+        # Violent crime alone puts 0115 first; theft alone puts 0114 first.
+        violence = self.client.get("/api/rank", {"w_safety": 5, "wi_theft": 0}).json()["results"]
+        theft = self.client.get("/api/rank", {"w_safety": 5, "wi_violent-crime": 0}).json()["results"]
+        self.assertEqual(violence[0]["code"], "0115")
+        self.assertEqual(theft[0]["code"], "0114")
+
+    def test_indicators_count_equally_by_default(self):
+        default = self.client.get("/api/rank", {"w_safety": 5}).json()["results"]
+        equal = self.client.get("/api/rank", {"w_safety": 5, "wi_theft": 7, "wi_violent-crime": 7}).json()["results"]
+        self.assertEqual(default, equal)
 
     def test_weight_on_dimension_without_data_is_harmless(self):
-        data = self.client.get("/api/rank", {"w_safety": 1, "w_housing": 10}).json()["results"]
+        data = self.client.get("/api/rank", {"w_safety": 1, "w_housing": 10, "wi_theft": 0}).json()["results"]
         self.assertEqual(data[0]["code"], "0115")
 
     def test_rejects_bad_weights(self):
-        for params in [{"w_safety": "x"}, {"w_safety": 11}, {"w_safety": -1}, {"w_violent-crime": 1}]:
+        bad = [
+            {"w_safety": "x"},
+            {"w_safety": 11},
+            {"w_safety": -1},
+            {"w_violent-crime": 1},
+            {"wi_theft": "x"},
+            {"wi_theft": 11},
+            {"wi_safety": 1},
+        ]
+        for params in bad:
             with self.subTest(params=params):
                 response = self.client.get("/api/rank", params)
                 self.assertEqual(response.status_code, 400)
@@ -49,6 +73,12 @@ class RankApiTests(TestCase):
         self.assertIn('id="w_housing"', html)
         self.assertNotIn('id="w_violent-crime"', html)
         self.assertIn("data saknas ännu", html)  # house-price has no values
+
+    def test_index_renders_indicator_sliders_where_there_is_a_choice(self):
+        html = self.client.get("/").content.decode()
+        self.assertIn('id="wi_violent-crime"', html)  # safety has two indicators with data
+        self.assertIn('id="wi_theft"', html)
+        self.assertNotIn('id="wi_house-price"', html)  # housing has none
 
 
 class LoadDataTests(TestCase):

@@ -43,6 +43,21 @@ class DimensionScoreTests(SimpleTestCase):
         scores = dimension_scores(CODES, {"violence": VALUES["violence"], "theft": {}}, LOWER, DIMENSION)
         self.assertEqual(scores["safety"], {"a": 1, "b": 0.5, "c": 0})
 
+    def test_indicator_weights_make_a_weighted_mean(self):
+        # a: violence 1, theft 0 -> (1*3 + 0*1) / 4
+        scores = dimension_scores(CODES, VALUES, LOWER, DIMENSION, {"violence": 3, "theft": 1})
+        self.assertAlmostEqual(scores["safety"]["a"], 0.75)
+        self.assertAlmostEqual(scores["safety"]["c"], 0.25)
+
+    def test_indicator_with_weight_zero_is_left_out(self):
+        scores = dimension_scores(CODES, VALUES, LOWER, DIMENSION, {"theft": 0})
+        self.assertEqual(scores["safety"], {"a": 1, "b": 0.5, "c": 0})
+
+    def test_all_indicators_at_zero_drop_the_dimension(self):
+        scores = dimension_scores(CODES, VALUES, LOWER, DIMENSION, {"violence": 0, "theft": 0})
+        self.assertNotIn("safety", scores)
+        self.assertIn("housing", scores)
+
 
 class RankTests(SimpleTestCase):
     def setUp(self):
