@@ -12,18 +12,19 @@ score.
 
 ## Dimensions and indicators
 
-Each slider weights a **dimension**. A dimension's score is the plain mean of
-its indicators, so adding an indicator never gives a dimension more weight.
+Each slider weights a **dimension**. A dimension's score is the mean of its
+indicators (equal by default, adjustable with the smaller indicator sliders),
+so adding an indicator never gives a dimension more weight.
 Dimensions live in `data/dimensions.json`, indicators in `data/indicators.json`.
 
 | Dimension | Indicator | Source | Status |
 |---|---|---|---|
 | Trygghet | Reported violent crime, theft, vandalism per 1,000 inhabitants (average 2020–2022) | SKR and MSB, [*Öppna jämförelser: Trygghet och säkerhet 2023*](https://skr.se/statistikochanalys/jamforelsertrygghetochsakerhet.9665.html), table appendix indicators A3–A5 (data from Brå) | loaded |
 | Boendekostnad | Average small-house price 2025 | SCB, *Fastighetspriser och lagfarter* | loaded |
-| Boendekostnad | Small-house price per m² (N07909) | Kolada (data from SCB) | after the first Kolada import |
-| Boendekostnad | House price / median income | computed when loading | after the first Kolada import |
-| Ekonomi och jobb | Median income, unemployment, tax rate | Kolada | after the first Kolada import |
-| Skola | Average merit value and gymnasium eligibility, year 9 | Kolada | after the first Kolada import |
+| Boendekostnad | Small-house price per m² 2025 (N07909) | Kolada (data from SCB) | loaded |
+| Boendekostnad | House price / median income | computed when loading | loaded |
+| Ekonomi och jobb | Median net income 2024 (N00905), unemployment 18–65 2025 (N03920), tax rate 2026 (N00900) | Kolada | loaded |
+| Skola | Average merit value and vocational-programme eligibility, year 9, 2026 (N15504, N15424) | Kolada | loaded (288 of 290 kommuner for eligibility) |
 
 Reported crime is not the same as all crime. It is also skewed by tourism,
 commuting and shopping centres in small municipalities. The app says this on
@@ -48,7 +49,10 @@ raw downloads (not committed)          data/ (committed, plain CSV/JSON)        
 - `load_data` checks every value against the indicator's plausible `range` and
   computes `derived` indicators (e.g. price / income). It fails rather than load
   data that looks wrong, such as income in kr instead of tkr.
-- `GET /api/rank?w_<dimension>=0..10`: JSON ranking used by the frontend.
+- `GET /api/rank?w_<dimension>=0..10&wi_<indicator>=0..10`: JSON ranking used
+  by the frontend. Indicator weights default to equal; a dimension with two or
+  more loaded indicators (today: the three crime types under Trygghet) gets a
+  slider per indicator in the UI.
 - Frontend: plain JS with Leaflet (vendored in `finder/static/finder/vendor/`).
   The map uses a 5-step blue quantile scale. There are no background tiles:
   kommun shapes plus län outlines (merged from the kommuner) are the whole map,

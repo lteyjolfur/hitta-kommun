@@ -28,11 +28,22 @@
                  min="0" max="{{ max_weight }}" step="1"
                  value="{% if dim.has_data %}{{ default_weight }}{% else %}0{% endif %}"
                  {% if not dim.has_data %}disabled{% endif %}>
-          <ul class="weight__parts">
+          <ul class="weight__parts{% if dim.indicator_sliders %} weight__parts--sliders{% endif %}">
             {% for ind in dim.indicators %}
+            {% if dim.indicator_sliders and ind.has_data %}
+            <li class="subweight">
+              <label for="wi_{{ ind.slug }}">
+                <span>{{ ind.name }} <span class="hint">({% if ind.lower_is_better %}lägre{% else %}högre{% endif %} är bättre)</span></span>
+                <output for="wi_{{ ind.slug }}" id="oi_{{ ind.slug }}"></output>
+              </label>
+              <input type="range" id="wi_{{ ind.slug }}" name="wi_{{ ind.slug }}" data-dimension="{{ dim.slug }}"
+                     min="0" max="{{ max_weight }}" step="1" value="{{ default_weight }}">
+            </li>
+            {% else %}
             <li{% if not ind.has_data %} class="missing"{% endif %}>
               {{ ind.name }}{% if ind.has_data %} <span class="hint">({% if ind.lower_is_better %}lägre{% else %}högre{% endif %} är bättre)</span>{% else %} <span class="hint">– data saknas ännu</span>{% endif %}
             </li>
+            {% endif %}
             {% endfor %}
           </ul>
         </div>

@@ -59,6 +59,10 @@ h2 { font-size: 1rem; margin: 24px 0 8px; }
 .weight input { width: 100%; accent-color: var(--accent); }
 .weight__parts { margin: 2px 0 0; padding-left: 1.1em; font-size: 0.85rem; color: var(--ink-muted); }
 .weight__parts .missing { opacity: 0.7; }
+.weight__parts--sliders { list-style: none; padding-left: 0.6em; border-left: 2px solid var(--line); margin-top: 6px; display: grid; gap: 4px; }
+.subweight label { display: flex; justify-content: space-between; gap: 8px; font-weight: 400; }
+.subweight output { font-variant-numeric: tabular-nums; }
+.subweight--off { opacity: 0.5; }
 .hint { white-space: nowrap; }
 .weight--empty { opacity: 0.6; }
 

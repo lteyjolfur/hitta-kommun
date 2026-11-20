@@ -6,8 +6,9 @@ only counts as much as the user's weight says.
 
 Scoring has two levels:
 1. Each indicator is min-max scaled to 0..1 (1 = the preferred end).
-2. A dimension's sub-score is the plain mean of its indicators' scores, and the
-   kommun's score is the weighted mean of its dimension sub-scores.
+2. A dimension's sub-score is the mean of its indicators' scores (weighted by
+   the user's indicator weights, equal by default), and the kommun's score is
+   the weighted mean of its dimension sub-scores.
 """
 
 from dataclasses import dataclass, field
@@ -34,23 +35,28 @@ def normalize(values, lower_is_better):
     return scaled
 
 
-def dimension_scores(codes, values, lower_is_better, dimension_of):
+def dimension_scores(codes, values, lower_is_better, dimension_of, indicator_weights=None):
     """Return {dimension: {code: 0..1}}: the mean of each kommun's indicator scores.
 
-    A kommun missing one indicator in a dimension is scored on the others; a
-    kommun missing all of them gets no entry for that dimension.
+    `indicator_weights` ({indicator: weight}) turns the plain mean into a
+    weighted one; indicators not listed count with weight 1 and indicators
+    with weight 0 are left out. A kommun missing one indicator in a dimension
+    is scored on the others; a kommun missing all of them gets no entry for
+    that dimension.
     """
+    indicator_weights = indicator_weights or {}
     by_dimension = {}
     for slug, raw in values.items():
-        if raw:
-            by_dimension.setdefault(dimension_of[slug], []).append(normalize(raw, lower_is_better[slug]))
+        weight = indicator_weights.get(slug, 1)
+        if raw and weight > 0:
+            by_dimension.setdefault(dimension_of[slug], []).append((normalize(raw, lower_is_better[slug]), weight))
     result = {}
     for dimension, scaled_list in by_dimension.items():
         scores = {}
         for code in codes:
-            present = [scaled[code] for scaled in scaled_list if code in scaled]
+            present = [(scaled[code], weight) for scaled, weight in scaled_list if code in scaled]
             if present:
-                scores[code] = sum(present) / len(present)
+                scores[code] = sum(s * w for s, w in present) / sum(w for _, w in present)
         result[dimension] = scores
     return result
 

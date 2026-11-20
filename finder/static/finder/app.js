@@ -112,6 +112,12 @@ function updateOutputs() {
     const input = document.getElementById(`w_${dim.slug}`);
     const out = document.getElementById(`o_${dim.slug}`);
     if (input && out) out.textContent = dim.has_data ? input.value : "";
+    // Indicator sliders only matter while their dimension counts at all.
+    const off = !input || Number(input.value) === 0;
+    form.querySelectorAll(`input[data-dimension="${dim.slug}"]`).forEach((sub) => {
+      sub.closest(".subweight").classList.toggle("subweight--off", off);
+      document.getElementById(`oi_${sub.id.slice(3)}`).textContent = sub.value;
+    });
   });
 }
 
@@ -122,6 +128,7 @@ async function refresh() {
   dimensions
     .filter((dim) => dim.has_data)
     .forEach((dim) => params.set(`w_${dim.slug}`, document.getElementById(`w_${dim.slug}`).value));
+  form.querySelectorAll("input[data-dimension]").forEach((sub) => params.set(sub.name, sub.value));
 
   if (pending) pending.abort();
   pending = new AbortController();
